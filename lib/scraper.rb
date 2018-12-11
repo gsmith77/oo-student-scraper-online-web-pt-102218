@@ -3,45 +3,42 @@ require 'open-uri'
 require 'pry'
 
 class Scraper
-
+  
   def self.scrape_index_page(index_url)
+    students=[]
     doc = Nokogiri::HTML(open(index_url))
     
-    students = []
-    
-    doc.css(".student-card a").each do |student|
-      name = student.css(".student-name").first.text
-      location = student.css("p.student-location").text
+    doc.css("div.student-card a").each do |student|
+      name = student.css(".student-name").text
+      location = student.css(".student-location").text
       profile_url = student.attribute("href").value
-      students << {name: name, profile_url: profile_url, location: location}
+      students << {name: name, location: location, profile_url: profile_url}
     end
     students
   end
-
   
-   def self.scrape_profile_page(profile_url)
+  
+  def self.scrape_profile_page(profile_url)
+    doc = Nokogiri::HTML(open(profile_url))
     
     profile = {}
-    doc = Nokogiri::HTML(open(profile_url))
-    doc.css(".social-icon-container a").each do |social|
-  
+    
+    doc.css("div.social-icon-container a").each do |social|
+      
       link = social.attr("href")
-      if link.include?("facebook")
-        profile[:facebook] = link
-      elsif link.include?("github")
-        profile[:github] = link
-      elsif link.include?("linkedin")
-        profile[:linkedin] = link
-      elsif link.include?("twitter")
+      
+      if link.include?("twitter")
         profile[:twitter] = link
-      else
+        elsif link.include?("github")
+        profile[:github] = link
+        elsif link.include?("linkedin")
+        profile[:linkedin] = link
+        else link.include?("blog")
         profile[:blog] = link
       end
     end
-    profile[:profile_quote] = doc.css(".profile-quote").text
-    profile[:bio] = doc.css(".bio-content p").text
+    profile[:profile_quote] = doc.css("div.vitals-text-container").css("div.profile-quote").text
+    profile[:bio] = doc.css("div.details-container p").text
     profile
   end
 end
-  
-
