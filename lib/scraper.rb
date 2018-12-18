@@ -41,4 +41,9 @@ class Scraper
     profile[:bio] = doc.css("div.details-container p").text
     profile
   end
-end
+
+    
+  end
+  
+  
+  
